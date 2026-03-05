@@ -125,7 +125,7 @@ static int get_cpu_count(void)
 #elif defined(__APPLE__)
     int count = 1;
     size_t len = sizeof(count);
-    sysctlbyname("hw.logicalcpu", &count, &len, NULL, NULL);
+    sysctlbyname("hw.logicalcpu", &count, &len, NULL, 0);
     return count;
 #else
     long sc = sysconf(_SC_NPROCESSORS_ONLN);
@@ -146,7 +146,7 @@ static long long get_available_ram_bytes(void)
 #elif defined(__APPLE__)
     int64_t free_bytes = 0;
     size_t len = sizeof(free_bytes);
-    if (sysctlbyname("hw.memsize", &free_bytes, &len, NULL, NULL) == 0)
+    if (sysctlbyname("hw.memsize", &free_bytes, &len, NULL, 0) == 0)
         return (long long)(free_bytes * 9 / 10); /* return 90% of total as proxy */
     return 0LL;
 #else
