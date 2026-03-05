@@ -4,8 +4,8 @@ A lightweight C console application that generates configurable CPU and/or RAM
 overload for testing purposes (stress testing, monitoring validation, scheduler
 tuning, etc.).
 
-Supports **Linux x86_64**, **Linux ARM64**, **Windows x86_64**, and
-**Windows ARM64** — all compiled from a single source file.
+Supports **Linux x86_64**, **Linux ARM64**, **macOS x86_64**, **macOS ARM64**,
+**Windows x86_64**, and **Windows ARM64** — all compiled from a single source file.
 
 ---
 
@@ -36,7 +36,13 @@ make windows-x64
 # Windows ARM64  (requires llvm-mingw — see below)
 make windows-arm64
 
-# Build all four targets at once
+# macOS x86_64 (Intel)
+make macos-x64
+
+# macOS ARM64 (Apple Silicon)
+make macos-arm64
+
+# Build all targets at once
 make all-targets
 
 # Remove all binaries
@@ -49,6 +55,8 @@ Output binaries:
 |---|---|
 | Linux x86_64 | `overload-linux-x64` |
 | Linux ARM64 | `overload-linux-arm64` |
+| macOS x86_64 | `overload-macos-x64` |
+| macOS ARM64 | `overload-macos-arm64` |
 | Windows x64 | `overload-windows-x64.exe` |
 | Windows ARM64 | `overload-windows-arm64.exe` |
 
@@ -58,6 +66,9 @@ Output binaries:
 
 ### Linux x86_64 (native — no extra packages needed)
 Uses the system `gcc`.
+
+### macOS x86_64 / ARM64 (native — no extra packages needed)
+Uses the system `clang` (included with Xcode Command Line Tools).
 
 ### Linux ARM64
 ```bash
@@ -75,12 +86,12 @@ compiler. Use the pre-built **llvm-mingw** toolchain:
 
 1. Download the latest release for Linux x86_64 from:  
    <https://github.com/mstorsjo/llvm-mingw/releases>  
-   (file: `llvm-mingw-<date>-ucrt-ubuntu-20.04-x86_64.tar.xz`)
+   (file: `llvm-mingw-<date>-ucrt-ubuntu-22.04-x86_64.tar.xz`)
 
 2. Extract and add its `bin/` directory to your `PATH`:
    ```bash
    tar -xf llvm-mingw-*.tar.xz -C /opt/
-   export PATH="/opt/llvm-mingw-<date>-ucrt-ubuntu-20.04-x86_64/bin:$PATH"
+   export PATH="/opt/llvm-mingw-<date>-ucrt-ubuntu-22.04-x86_64/bin:$PATH"
    ```
 
 3. Build:
@@ -100,6 +111,10 @@ gcc -Wall -Wextra -pedantic -std=c99 -pthread -O2 \
 # Linux ARM64
 aarch64-linux-gnu-gcc -Wall -Wextra -pedantic -std=c99 -pthread -O2 \
     -o overload-linux-arm64 overload.c
+
+# macOS x86_64 or ARM64 (native)
+clang -Wall -Wextra -pedantic -std=c99 -pthread -O2 \
+    -o overload-macos-x64 overload.c   # or overload-macos-arm64
 
 # Windows x64 (cross-compile from Linux)
 x86_64-w64-mingw32-gcc -Wall -Wextra -pedantic -std=c99 -O2 \

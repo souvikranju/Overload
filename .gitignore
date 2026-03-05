@@ -2,3 +2,5 @@
 /overload-linux-arm64
 /overload-windows-x64.exe
 /overload-windows-arm64.exe
+/overload-macos-x64
+/overload-macos-arm64
