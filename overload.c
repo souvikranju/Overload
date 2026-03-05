@@ -32,6 +32,16 @@
 #  include <stdlib.h>
 #  include <string.h>
 #  include <errno.h>
+#elif defined(__APPLE__)
+#  include <stdio.h>
+#  include <stdlib.h>
+#  include <string.h>
+#  include <stdint.h>
+#  include <pthread.h>
+#  include <unistd.h>
+#  include <time.h>
+#  include <errno.h>
+#  include <sys/sysctl.h>
 #else
 #  define _POSIX_C_SOURCE 200809L
 #  include <stdio.h>
@@ -112,6 +122,11 @@ static int get_cpu_count(void)
     SYSTEM_INFO si;
     GetSystemInfo(&si);
     return (int)si.dwNumberOfProcessors;
+#elif defined(__APPLE__)
+    int count = 1;
+    size_t len = sizeof(count);
+    sysctlbyname("hw.logicalcpu", &count, &len, NULL, NULL);
+    return count;
 #else
     long sc = sysconf(_SC_NPROCESSORS_ONLN);
     return (sc > 0) ? (int)sc : 1;
@@ -128,6 +143,12 @@ static long long get_available_ram_bytes(void)
     ms.dwLength = sizeof(ms);
     if (!GlobalMemoryStatusEx(&ms)) return 0LL;
     return (long long)ms.ullAvailPhys;
+#elif defined(__APPLE__)
+    int64_t free_bytes = 0;
+    size_t len = sizeof(free_bytes);
+    if (sysctlbyname("hw.memsize", &free_bytes, &len, NULL, NULL) == 0)
+        return (long long)(free_bytes * 9 / 10); /* return 90% of total as proxy */
+    return 0LL;
 #else
     FILE *f = fopen("/proc/meminfo", "r");
     if (!f) return 0LL;
