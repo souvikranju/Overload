@@ -1,3 +1,4 @@
-/workload-linux-arm64
-/workload-linux-x64
-/workload-windows-x64.exe
+/overload-linux-x64
+/overload-linux-arm64
+/overload-windows-x64.exe
+/overload-windows-arm64.exe

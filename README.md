@@ -1,7 +1,7 @@
-# workload — Fake System Workload Generator
+# overload — Fake System Overload Generator
 
 A lightweight C console application that generates configurable CPU and/or RAM
-workload for testing purposes (stress testing, monitoring validation, scheduler
+overload for testing purposes (stress testing, monitoring validation, scheduler
 tuning, etc.).
 
 Supports **Linux x86_64**, **Linux ARM64**, **Windows x86_64**, and
@@ -47,10 +47,10 @@ Output binaries:
 
 | Target | Binary name |
 |---|---|
-| Linux x86_64 | `workload-linux-x64` |
-| Linux ARM64 | `workload-linux-arm64` |
-| Windows x64 | `workload-windows-x64.exe` |
-| Windows ARM64 | `workload-windows-arm64.exe` |
+| Linux x86_64 | `overload-linux-x64` |
+| Linux ARM64 | `overload-linux-arm64` |
+| Windows x64 | `overload-windows-x64.exe` |
+| Windows ARM64 | `overload-windows-arm64.exe` |
 
 ---
 
@@ -95,19 +95,19 @@ compiler. Use the pre-built **llvm-mingw** toolchain:
 ```bash
 # Linux x86_64
 gcc -Wall -Wextra -pedantic -std=c99 -pthread -O2 \
-    -o workload-linux-x64 workload.c
+    -o overload-linux-x64 overload.c
 
 # Linux ARM64
 aarch64-linux-gnu-gcc -Wall -Wextra -pedantic -std=c99 -pthread -O2 \
-    -o workload-linux-arm64 workload.c
+    -o overload-linux-arm64 overload.c
 
 # Windows x64 (cross-compile from Linux)
 x86_64-w64-mingw32-gcc -Wall -Wextra -pedantic -std=c99 -O2 \
-    -o workload-windows-x64.exe workload.c
+    -o overload-windows-x64.exe overload.c
 
 # Windows ARM64 (cross-compile from Linux, requires llvm-mingw)
 aarch64-w64-mingw32-gcc -Wall -Wextra -pedantic -std=c99 -O2 \
-    -o workload-windows-arm64.exe workload.c
+    -o overload-windows-arm64.exe overload.c
 ```
 
 ---
@@ -116,9 +116,9 @@ aarch64-w64-mingw32-gcc -Wall -Wextra -pedantic -std=c99 -O2 \
 
 | Switch | Argument | Default | Description |
 |--------|----------|---------|-------------|
-| `--cpu` | *(none)* | off | Enable CPU workload — spawns one busy-loop thread per core |
-| `--ram` | `[MB]` *(optional)* | off | Enable RAM workload — allocate and commit the specified MB. If `MB` is omitted, ~90% of currently available system RAM is used |
-| `--time` | `<secs>` | `5` (with flags) / `10` (no args) | How long to run the workload in seconds |
+| `--cpu` | *(none)* | off | Enable CPU overload — spawns one busy-loop thread per core |
+| `--ram` | `[MB]` *(optional)* | off | Enable RAM overload — allocate and commit the specified MB. If `MB` is omitted, ~90% of currently available system RAM is used |
+| `--time` | `<secs>` | `5` (with flags) / `10` (no args) | How long to run the overload in seconds |
 | `--cores` | `<num>` | all logical cores | Override the number of CPU threads spawned (only relevant with `--cpu`) |
 | `--help` / `-h` | *(none)* | — | Print usage information and exit |
 
@@ -140,7 +140,7 @@ system cannot touch all pages within the time limit. After the duration expires
 the memory is freed before exit.
 
 **`--time <secs>`**  
-Controls the total wall-clock duration of the workload. When no arguments are
+Controls the total wall-clock duration of the overload. When no arguments are
 given at all, the default is **10 seconds**. When at least one flag is
 provided but `--time` is omitted, the default is **5 seconds**.
 
@@ -153,41 +153,41 @@ Has no effect when `--cpu` is not specified.
 ## Usage Examples
 
 ```bash
-# No arguments — run both CPU and RAM workload for 10 seconds (all cores, auto RAM)
-./workload-linux-x64
+# No arguments — run both CPU and RAM overload for 10 seconds (all cores, auto RAM)
+./overload-linux-x64
 
-# CPU workload only, 5 seconds, all cores
-./workload-linux-x64 --cpu --time 5
+# CPU overload only, 5 seconds, all cores
+./overload-linux-x64 --cpu --time 5
 
-# CPU workload only, 5 seconds, limited to 4 cores
-./workload-linux-x64 --cpu --time 5 --cores 4
+# CPU overload only, 5 seconds, limited to 4 cores
+./overload-linux-x64 --cpu --time 5 --cores 4
 
-# RAM workload only, allocate 2048 MB, hold for 10 seconds
-./workload-linux-x64 --ram 2048 --time 10
+# RAM overload only, allocate 2048 MB, hold for 10 seconds
+./overload-linux-x64 --ram 2048 --time 10
 
-# RAM workload only, auto-detect available RAM (~90%), hold for 10 seconds
-./workload-linux-x64 --ram --time 10
+# RAM overload only, auto-detect available RAM (~90%), hold for 10 seconds
+./overload-linux-x64 --ram --time 10
 
-# Combined CPU + RAM workload, 15 seconds, 4 cores, 1024 MB
-./workload-linux-x64 --cpu --ram 1024 --time 15 --cores 4
+# Combined CPU + RAM overload, 15 seconds, 4 cores, 1024 MB
+./overload-linux-x64 --cpu --ram 1024 --time 15 --cores 4
 
 # Show help
-./workload-linux-x64 --help
+./overload-linux-x64 --help
 ```
 
-*(Replace `workload-linux-x64` with the appropriate binary for your platform.)*
+*(Replace `overload-linux-x64` with the appropriate binary for your platform.)*
 
 ---
 
 ## Sample Output
 
 ```
-Starting workload...
-  CPU workload : 4 core(s) for 15 second(s)
-  RAM workload : 1024 MB for 15 second(s)
+Starting overload...
+  CPU overload : 4 core(s) for 15 second(s)
+  RAM overload : 1024 MB for 15 second(s)
 
 ========================================
-         Workload Test Report
+         Overload Test Report
 ========================================
 Test Type       : CPU + RAM
 Duration        : 15 seconds (actual: 15.1 s)
@@ -236,7 +236,7 @@ All resources are released before exit regardless of the code path:
   pages as possible within the requested duration and report the actual amount
   committed. The difference between "available" and "allocated" in the report is
   the amount that could not be touched before the timer expired.
-- **Compiler optimisation prevention**: all workload variables are declared
+- **Compiler optimisation prevention**: all overload variables are declared
   `volatile` and GCC/MSVC memory-barrier intrinsics are inserted to prevent the
   compiler from eliminating the busy loops or memory writes.
 - **Windows threading**: on Windows, Win32 `CreateThread` / `WaitForSingleObject`

@@ -1,24 +1,24 @@
 /*
- * workload.c - Configurable fake system workload generator for testing
+ * overload.c - Configurable fake system overload generator for testing
  *
  * Supports: Linux x86_64, Linux ARM64, Windows x86_64, Windows ARM64
  *
  * Linux compile:
- *   gcc -Wall -Wextra -pedantic -std=c99 -pthread -O2 -o workload workload.c
+ *   gcc -Wall -Wextra -pedantic -std=c99 -pthread -O2 -o overload overload.c
  *
  * Windows cross-compile (x64, from Linux):
  *   x86_64-w64-mingw32-gcc -Wall -Wextra -pedantic -std=c99 -O2 \
- *       -o workload.exe workload.c
+ *       -o overload.exe overload.c
  *
  * Windows cross-compile (ARM64, from Linux with llvm-mingw):
  *   aarch64-w64-mingw32-gcc -Wall -Wextra -pedantic -std=c99 -O2 \
- *       -o workload-arm64.exe workload.c
+ *       -o overload-arm64.exe overload.c
  *
  * Usage:
- *   ./workload                          (CPU + RAM for 10 sec, all cores)
- *   ./workload --cpu --time 5
- *   ./workload --ram 2048 --time 10
- *   ./workload --cpu --ram 1024 --time 15 --cores 4
+ *   ./overload                          (CPU + RAM for 10 sec, all cores)
+ *   ./overload --cpu --time 5
+ *   ./overload --ram 2048 --time 10
+ *   ./overload --cpu --ram 1024 --time 15 --cores 4
  */
 
 /* =========================================================================
@@ -56,8 +56,8 @@
  * Structures
  * ========================================================================= */
 typedef struct {
-    int  do_cpu;    /* 1 = run CPU workload */
-    int  do_ram;    /* 1 = run RAM workload */
+    int  do_cpu;    /* 1 = run CPU overload */
+    int  do_ram;    /* 1 = run RAM overload */
     long ram_mb;    /* MB to allocate; 0 = auto */
     int  duration;  /* seconds */
     int  cores;     /* 0 = auto-detect */
@@ -197,7 +197,7 @@ static void thread_join(thread_t t)
 #endif /* _WIN32 */
 
 /* =========================================================================
- * CPU workload worker (shared logic)
+  * CPU overload worker (shared logic)
  *
  * Uses a fixed-cost busy loop: trial-divide a large candidate over a fixed
  * range of divisors so every outer iteration does the same amount of work.
@@ -266,9 +266,9 @@ static void *cpu_worker_posix(void *arg)
 #endif
 
 /* =========================================================================
- * RAM workload
+  * RAM overload
  * ========================================================================= */
-static int run_ram_workload(long ram_mb, double end_time, long *actual_mb_out)
+static int run_ram_overload(long ram_mb, double end_time, long *actual_mb_out)
 {
     long page_sz   = get_page_size();
     long long bytes = (long long)ram_mb * 1024LL * 1024LL;
@@ -332,7 +332,7 @@ static void print_usage(const char *prog)
         "                     (default: 5 with flags, 10 with no args)\n"
         "  --cores <num>      Override CPU core count (default: all logical cores)\n"
         "\n"
-        "If no arguments are given, both CPU and RAM workloads run for 10 seconds.\n"
+        "If no arguments are given, both CPU and RAM overloads run for 10 seconds.\n"
         "\n"
         "Examples:\n"
         "  %s\n"
@@ -355,7 +355,7 @@ static void print_report(const Config *cfg, int actual_cores,
 
     printf("\n");
     printf("========================================\n");
-    printf("         Workload Test Report\n");
+    printf("         Overload Test Report\n");
     printf("========================================\n");
     printf("Test Type       : %s\n", type);
     printf("Duration        : %d seconds (actual: %.1f s)\n",
@@ -503,12 +503,12 @@ int main(int argc, char *argv[])
     }
 
     /* ---- Print startup info ---- */
-    printf("Starting workload...\n");
+    printf("Starting overload...\n");
     if (cfg.do_cpu)
-        printf("  CPU workload : %d core(s) for %d second(s)\n",
+        printf("  CPU overload : %d core(s) for %d second(s)\n",
                num_cores, cfg.duration);
     if (cfg.do_ram)
-        printf("  RAM workload : %ld MB for %d second(s)\n",
+        printf("  RAM overload : %ld MB for %d second(s)\n",
                ram_mb, cfg.duration);
     printf("\n");
 
@@ -544,11 +544,11 @@ int main(int argc, char *argv[])
         }
     }
 
-    /* ---- RAM workload (main thread) ---- */
+    /* ---- RAM overload (main thread) ---- */
     long actual_mb = 0;
 
     if (cfg.do_ram) {
-        if (run_ram_workload(ram_mb, t_end, &actual_mb) != 0) {
+        if (run_ram_overload(ram_mb, t_end, &actual_mb) != 0) {
             if (cfg.do_cpu && threads) {
                 int t;
                 for (t = 0; t < actual_cores; t++) thread_join(threads[t]);

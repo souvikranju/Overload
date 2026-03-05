@@ -1,5 +1,5 @@
 # =============================================================================
-# Makefile — workload cross-platform build
+# Makefile — overload cross-platform build
 #
 # Targets:
 #   make / make all          Linux x86_64  (native gcc)
@@ -22,11 +22,11 @@ CFLAGS_LINUX    = $(CFLAGS_COMMON) -pthread
 CFLAGS_WIN      = $(CFLAGS_COMMON)
 
 # ---------- Source & output names --------------------------------------------
-SRC             = workload.c
-BIN_LINUX_X64   = workload-linux-x64
-BIN_LINUX_ARM64 = workload-linux-arm64
-BIN_WIN_X64     = workload-windows-x64.exe
-BIN_WIN_ARM64   = workload-windows-arm64.exe
+SRC             = overload.c
+BIN_LINUX_X64   = overload-linux-x64
+BIN_LINUX_ARM64 = overload-linux-arm64
+BIN_WIN_X64     = overload-windows-x64.exe
+BIN_WIN_ARM64   = overload-windows-arm64.exe
 
 # ---------- Default target ---------------------------------------------------
 .PHONY: all linux-x64 linux-arm64 windows-x64 windows-arm64 all-targets clean
@@ -72,5 +72,5 @@ all-targets: linux-x64 linux-arm64 windows-x64 windows-arm64
 
 # ---------- Clean ------------------------------------------------------------
 clean:
-	rm -f $(BIN_LINUX_X64) $(BIN_LINUX_ARM64) $(BIN_WIN_X64) $(BIN_WIN_ARM64) workload
+	rm -f $(BIN_LINUX_X64) $(BIN_LINUX_ARM64) $(BIN_WIN_X64) $(BIN_WIN_ARM64) overload
 	@echo "Cleaned."
