@@ -9,6 +9,108 @@ Supports **Linux x86_64**, **Linux ARM64**, **macOS x86_64**, **macOS ARM64**,
 
 ---
 
+## Download
+
+Pre-built binaries for the latest release:
+
+| Platform | Architecture | Download |
+|----------|-------------|---------|
+| Linux | x86_64 | [overload-linux-x64](https://github.com/souvikranju/Overload/releases/latest/download/overload-linux-x64) |
+| Linux | ARM64 | [overload-linux-arm64](https://github.com/souvikranju/Overload/releases/latest/download/overload-linux-arm64) |
+| macOS | x86_64 (Intel) | [overload-macos-x64](https://github.com/souvikranju/Overload/releases/latest/download/overload-macos-x64) |
+| macOS | ARM64 (Apple Silicon) | [overload-macos-arm64](https://github.com/souvikranju/Overload/releases/latest/download/overload-macos-arm64) |
+| Windows | x86_64 | [overload-windows-x64.exe](https://github.com/souvikranju/Overload/releases/latest/download/overload-windows-x64.exe) |
+| Windows | ARM64 | [overload-windows-arm64.exe](https://github.com/souvikranju/Overload/releases/latest/download/overload-windows-arm64.exe) |
+
+---
+
+## Command-Line Switches
+
+| Switch | Argument | Default | Description |
+|--------|----------|---------|-------------|
+| `--cpu` | *(none)* | off | Enable CPU overload — spawns one busy-loop thread per core |
+| `--ram` | `[MB]` *(optional)* | off | Enable RAM overload — allocate and commit the specified MB. If `MB` is omitted, ~90% of currently available system RAM is used |
+| `--time` | `<secs>` | `5` (with flags) / `10` (no args) | How long to run the overload in seconds |
+| `--cores` | `<num>` | all logical cores | Override the number of CPU threads spawned (only relevant with `--cpu`) |
+| `--help` / `-h` | *(none)* | — | Print usage information and exit |
+
+### Notes on individual switches
+
+**`--cpu`**  
+Spawns N threads (POSIX pthreads on Linux, Win32 threads on Windows).
+Default N = all logical cores. Each thread runs a `volatile`-protected
+prime-number calculation loop, sustaining ~100% utilisation per core for the
+requested duration.
+
+**`--ram [MB]`**  
+Allocates a contiguous block via `malloc`, then writes one byte per page to
+force physical memory commitment (prevents lazy/copy-on-write mapping). The
+touch loop is timer-aware: it checks the clock every 1,000 pages and stops
+early if the requested duration has already elapsed. The report shows the
+amount of RAM **actually committed**, which may be less than requested if the
+system cannot touch all pages within the time limit. After the duration expires
+the memory is freed before exit.
+
+**`--time <secs>`**  
+Controls the total wall-clock duration of the overload. When no arguments are
+given at all, the default is **10 seconds**. When at least one flag is
+provided but `--time` is omitted, the default is **5 seconds**.
+
+**`--cores <num>`**  
+Limits CPU thread count regardless of how many logical cores the system has.
+Has no effect when `--cpu` is not specified.
+
+---
+
+## Usage Examples
+
+```bash
+# No arguments — run both CPU and RAM overload for 10 seconds (all cores, auto RAM)
+./overload-linux-x64
+
+# CPU overload only, 5 seconds, all cores
+./overload-linux-x64 --cpu --time 5
+
+# CPU overload only, 5 seconds, limited to 4 cores
+./overload-linux-x64 --cpu --time 5 --cores 4
+
+# RAM overload only, allocate 2048 MB, hold for 10 seconds
+./overload-linux-x64 --ram 2048 --time 10
+
+# RAM overload only, auto-detect available RAM (~90%), hold for 10 seconds
+./overload-linux-x64 --ram --time 10
+
+# Combined CPU + RAM overload, 15 seconds, 4 cores, 1024 MB
+./overload-linux-x64 --cpu --ram 1024 --time 15 --cores 4
+
+# Show help
+./overload-linux-x64 --help
+```
+
+*(Replace `overload-linux-x64` with the appropriate binary for your platform.)*
+
+---
+
+## Sample Output
+
+```
+Starting overload...
+  CPU overload : 4 core(s) for 15 second(s)
+  RAM overload : 1024 MB for 15 second(s)
+
+========================================
+         Overload Test Report
+========================================
+Test Type       : CPU + RAM
+Duration        : 15 seconds (actual: 15.1 s)
+CPU Cores Used  : 4
+RAM Allocated   : 1024 MB
+Status          : Test completed successfully
+========================================
+```
+
+---
+
 ## Requirements
 
 | Item | Minimum |
@@ -123,93 +225,6 @@ x86_64-w64-mingw32-gcc -Wall -Wextra -pedantic -std=c99 -O2 \
 # Windows ARM64 (cross-compile from Linux, requires llvm-mingw)
 aarch64-w64-mingw32-gcc -Wall -Wextra -pedantic -std=c99 -O2 \
     -o overload-windows-arm64.exe overload.c
-```
-
----
-
-## Command-Line Switches
-
-| Switch | Argument | Default | Description |
-|--------|----------|---------|-------------|
-| `--cpu` | *(none)* | off | Enable CPU overload — spawns one busy-loop thread per core |
-| `--ram` | `[MB]` *(optional)* | off | Enable RAM overload — allocate and commit the specified MB. If `MB` is omitted, ~90% of currently available system RAM is used |
-| `--time` | `<secs>` | `5` (with flags) / `10` (no args) | How long to run the overload in seconds |
-| `--cores` | `<num>` | all logical cores | Override the number of CPU threads spawned (only relevant with `--cpu`) |
-| `--help` / `-h` | *(none)* | — | Print usage information and exit |
-
-### Notes on individual switches
-
-**`--cpu`**  
-Spawns N threads (POSIX pthreads on Linux, Win32 threads on Windows).
-Default N = all logical cores. Each thread runs a `volatile`-protected
-prime-number calculation loop, sustaining ~100% utilisation per core for the
-requested duration.
-
-**`--ram [MB]`**  
-Allocates a contiguous block via `malloc`, then writes one byte per page to
-force physical memory commitment (prevents lazy/copy-on-write mapping). The
-touch loop is timer-aware: it checks the clock every 1,000 pages and stops
-early if the requested duration has already elapsed. The report shows the
-amount of RAM **actually committed**, which may be less than requested if the
-system cannot touch all pages within the time limit. After the duration expires
-the memory is freed before exit.
-
-**`--time <secs>`**  
-Controls the total wall-clock duration of the overload. When no arguments are
-given at all, the default is **10 seconds**. When at least one flag is
-provided but `--time` is omitted, the default is **5 seconds**.
-
-**`--cores <num>`**  
-Limits CPU thread count regardless of how many logical cores the system has.
-Has no effect when `--cpu` is not specified.
-
----
-
-## Usage Examples
-
-```bash
-# No arguments — run both CPU and RAM overload for 10 seconds (all cores, auto RAM)
-./overload-linux-x64
-
-# CPU overload only, 5 seconds, all cores
-./overload-linux-x64 --cpu --time 5
-
-# CPU overload only, 5 seconds, limited to 4 cores
-./overload-linux-x64 --cpu --time 5 --cores 4
-
-# RAM overload only, allocate 2048 MB, hold for 10 seconds
-./overload-linux-x64 --ram 2048 --time 10
-
-# RAM overload only, auto-detect available RAM (~90%), hold for 10 seconds
-./overload-linux-x64 --ram --time 10
-
-# Combined CPU + RAM overload, 15 seconds, 4 cores, 1024 MB
-./overload-linux-x64 --cpu --ram 1024 --time 15 --cores 4
-
-# Show help
-./overload-linux-x64 --help
-```
-
-*(Replace `overload-linux-x64` with the appropriate binary for your platform.)*
-
----
-
-## Sample Output
-
-```
-Starting overload...
-  CPU overload : 4 core(s) for 15 second(s)
-  RAM overload : 1024 MB for 15 second(s)
-
-========================================
-         Overload Test Report
-========================================
-Test Type       : CPU + RAM
-Duration        : 15 seconds (actual: 15.1 s)
-CPU Cores Used  : 4
-RAM Allocated   : 1024 MB
-Status          : Test completed successfully
-========================================
 ```
 
 ---
