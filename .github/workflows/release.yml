@@ -44,7 +44,7 @@ jobs:
             overload-windows-arm64.exe
 
   build-macos-x64:
-    runs-on: macos-12
+    runs-on: macos-13
     steps:
       - name: Checkout
         uses: actions/checkout@v4
