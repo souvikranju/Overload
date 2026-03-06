@@ -73,14 +73,14 @@ windows-arm64: $(SRC)
 	$(CC_WIN_ARM64) $(CFLAGS_WIN) -o $(BIN_WIN_ARM64) $(SRC)
 	@echo "Built: $(BIN_WIN_ARM64)"
 
-# ---------- macOS x86_64 (native on Intel Mac) -------------------------------
+# ---------- macOS x86_64 (cross-compiled with -arch x86_64) -----------------
 macos-x64: $(SRC)
-	$(CC_MACOS) $(CFLAGS_MACOS) -o $(BIN_MACOS_X64) $(SRC)
+	$(CC_MACOS) $(CFLAGS_MACOS) -arch x86_64 -o $(BIN_MACOS_X64) $(SRC)
 	@echo "Built: $(BIN_MACOS_X64)"
 
 # ---------- macOS ARM64 (native on Apple Silicon) ----------------------------
 macos-arm64: $(SRC)
-	$(CC_MACOS) $(CFLAGS_MACOS) -o $(BIN_MACOS_ARM64) $(SRC)
+	$(CC_MACOS) $(CFLAGS_MACOS) -arch arm64 -o $(BIN_MACOS_ARM64) $(SRC)
 	@echo "Built: $(BIN_MACOS_ARM64)"
 
 # ---------- Build all targets ------------------------------------------------
