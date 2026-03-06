@@ -272,3 +272,9 @@ All resources are released before exit regardless of the code path:
 - **Windows threading**: on Windows, Win32 `CreateThread` / `WaitForSingleObject`
   is used instead of pthreads. No extra DLLs are required — MinGW statically
   links the C runtime.
+
+---
+
+## License
+
+[MIT](LICENSE)
